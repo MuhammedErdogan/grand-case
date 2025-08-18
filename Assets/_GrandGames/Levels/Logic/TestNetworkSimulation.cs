@@ -23,8 +23,31 @@ public class TestNetworkSimulation : MonoBehaviour
         var url = "https://raw.githubusercontent.com/typicode/demo/master/db.json";
         var ct = this.GetCancellationTokenOnDestroy();
 
+        var getFromResources = await GetFromResources();
         var lastModifiedDate = await GetLastModifiedDate(url, ct);
+
+        if (getFromResources > lastModifiedDate)
+        {
+            Debug.Log($"Local data is newer than remote: {getFromResources} > {lastModifiedDate}");
+        }
+        else
+        {
+            Debug.Log($"Remote data is newer or equal: {getFromResources} <= {lastModifiedDate}");
+        }
+
         Debug.Log($"Last-Modified date for {url} is {lastModifiedDate}");
+    }
+
+    private async UniTask<DateTime> GetFromResources()
+    {
+        var lastModifiedString = PlayerPrefs.GetString("level_1_last_modified");
+        var lastModified = DateTime.TryParse(lastModifiedString, out var date) ?
+            date :
+            DateTime.MinValue;
+
+        Debug.Log($"Last-Modified date for level_1 is {lastModified}");
+
+        return lastModified;
     }
 
     private static async UniTask<DateTime> GetLastModifiedDate(string url, CancellationToken ct)
@@ -41,9 +64,18 @@ public class TestNetworkSimulation : MonoBehaviour
 
         Debug.Log($"HEAD request to {url} returned status {status}");
 
+
         return DateTime.TryParse(lastModified, out var lastModifiedDate) ?
             lastModifiedDate :
             DateTime.MinValue;
+    }
+
+    private void UpdateRemoteLevelLastModified(int levelIndex, DateTime lastModified)
+    {
+        var key = $"level_{levelIndex}_last_modified";
+        PlayerPrefs.SetString(key, lastModified.ToString("o")); // ISO 8601 format
+        PlayerPrefs.Save();
+        Debug.Log($"Updated {key} to {lastModified}");
     }
 
     public static async UniTask<(long status, Dictionary<string, string> headers)> HeadAsync(
