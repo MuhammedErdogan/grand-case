@@ -1,4 +1,4 @@
-namespace _GrandGames.Levels.Domain
+namespace _GrandGames.Levels.Logic.Domain
 {
     [System.Serializable]
     public class LevelData
