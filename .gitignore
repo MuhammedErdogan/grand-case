@@ -97,3 +97,5 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+/.idea/.idea.grand-case/.idea/vcs.xml
+/.idea/.idea.grand-case/.idea/workspace.xml
