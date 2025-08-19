@@ -22,13 +22,6 @@ namespace _GrandGames.Levels.Logic.Util
             return rel;
         }
 
-        private static string WithJsonExt(string rel)
-        {
-            return rel.EndsWith(".json", StringComparison.OrdinalIgnoreCase) ?
-                rel :
-                rel + ".json";
-        }
-
         private static string ToUri(string absolutePathLike)
         {
             var path = absolutePathLike.Replace("\\", "/");
@@ -179,15 +172,10 @@ namespace _GrandGames.Levels.Logic.Util
         public static async UniTask CopyStreamingToPersistentAtomic(
             string streamingRelative,
             string persistentRelative,
-            bool appendJsonExt = true,
             IProgress<float> progress = null,
             CancellationToken ct = default)
         {
             var rel = Normalize(streamingRelative);
-            if (appendJsonExt)
-            {
-                rel = WithJsonExt(rel);
-            }
 
             var url = StreamingAssetUrl(rel);
             var dst = PersistentAbsolute(persistentRelative);
@@ -200,7 +188,11 @@ namespace _GrandGames.Levels.Logic.Util
 
             if (req.result != UnityWebRequest.Result.Success)
             {
-                if (File.Exists(tmp)) File.Delete(tmp);
+                if (File.Exists(tmp))
+                {
+                    File.Delete(tmp);
+                }
+
                 throw new Exception(req.error);
             }
 
