@@ -1,10 +1,9 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading;
+using _GrandGames.Levels.Logic.Util;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Networking;
 
 public class TestNetworkSimulation : MonoBehaviour
 {
@@ -13,32 +12,38 @@ public class TestNetworkSimulation : MonoBehaviour
 
     private static readonly Regex LevelNameRegex = new("^[a-zA-Z0-9_]+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-    private void Start()
+    [ContextMenu("GetFromRemote")]
+    private async void GetFromRemote()
     {
-    }
-
-    [ContextMenu("Test")]
-    private async void Test()
-    {
-        var url = "https://raw.githubusercontent.com/typicode/demo/master/db.json";
         var ct = this.GetCancellationTokenOnDestroy();
 
-        var getFromResources = await GetFromResources();
-        var lastModifiedDate = await GetLastModifiedDate(url, ct);
-
-        if (getFromResources > lastModifiedDate)
+        try
         {
-            Debug.Log($"Local data is newer than remote: {getFromResources} > {lastModifiedDate}");
-        }
-        else
-        {
-            Debug.Log($"Remote data is newer or equal: {getFromResources} <= {lastModifiedDate}");
-        }
+            var dataAsBytes = await LocalFileHelper.GetStreamingBytes("levels_1_500/level_1_updated", ct: ct);
+            var persistentDataPath = Path.Combine(Application.persistentDataPath, "level_1.json");
 
-        Debug.Log($"Last-Modified date for {url} is {lastModifiedDate}");
+            await File.WriteAllBytesAsync(persistentDataPath, dataAsBytes, ct);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
-    private async UniTask<DateTime> GetFromResources()
+    [ContextMenu("GetFromResources")]
+    private async UniTask<string> GetFromResources()
+    {
+        var ct = this.GetCancellationTokenOnDestroy();
+        var dataFromResources = await LocalFileHelper.GetResourceText("resources_levels_1_500/level_1", ct: ct);
+
+        Debug.Log($"Data from resources: {dataFromResources}");
+
+        return dataFromResources;
+    }
+
+    [ContextMenu("GetLastUpdatedTime")]
+    private async UniTask<DateTime> GetLastUpdatedTime()
     {
         var lastModifiedString = PlayerPrefs.GetString("level_1_last_modified");
         var lastModified = DateTime.TryParse(lastModifiedString, out var date) ?
@@ -49,64 +54,16 @@ public class TestNetworkSimulation : MonoBehaviour
 
         return lastModified;
     }
-
-    private static async UniTask<DateTime> GetLastModifiedDate(string url, CancellationToken ct)
-    {
-        var currentLevelIndex = 1;
-
-        var (status, headers) = await HeadAsync(url, 10, ct);
-
-        headers.TryGetValue("Content-Type", out var contentType);
-        headers.TryGetValue("Content-Length", out var contentLength);
-
-        headers.TryGetValue("Last-Modified", out var lastModified);
-        headers.TryGetValue("ETag", out var etag);
-
-        Debug.Log($"HEAD request to {url} returned status {status}");
-
-
-        return DateTime.TryParse(lastModified, out var lastModifiedDate) ?
-            lastModifiedDate :
-            DateTime.MinValue;
-    }
-
-    private void UpdateRemoteLevelLastModified(int levelIndex, DateTime lastModified)
-    {
-        var key = $"level_{levelIndex}_last_modified";
-        PlayerPrefs.SetString(key, lastModified.ToString("o")); // ISO 8601 format
-        PlayerPrefs.Save();
-        Debug.Log($"Updated {key} to {lastModified}");
-    }
-
-    public static async UniTask<(long status, Dictionary<string, string> headers)> HeadAsync(
-        string url,
-        int timeoutSec = 10,
-        CancellationToken ct = default,
-        IDictionary<string, string> requestHeaders = null)
-    {
-        using var req = UnityWebRequest.Head(url);
-        req.timeout = timeoutSec;
-
-        if (requestHeaders != null)
-        {
-            foreach (var kv in requestHeaders)
-            {
-                req.SetRequestHeader(kv.Key, kv.Value);
-            }
-        }
-
-        await req.SendWebRequest().ToUniTask(cancellationToken: ct);
-
-#if UNITY_2020_1_OR_NEWER
-        var ok = req.result == UnityWebRequest.Result.Success;
-#else
-        bool ok = !(req.isNetworkError || req.isHttpError);
-#endif
-        if (!ok)
-        {
-            throw new Exception($"HEAD failed ({req.responseCode}): {req.error}");
-        }
-
-        return (req.responseCode, req.GetResponseHeaders());
-    }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// 0-500 levels
+/// 0 --> 10
+/// 10 --> 50 ilk 10 leveli discard et, zatne oyandim
+/// Algoritma: hangi dilimdeyim? bulundugum dilimdeki next remote 50 leveli al ancak oynaigim kisma kadar olani discard et
+/// 25 --> 30 oynadim, oyleyse 25'lik dilimdeyim, 30'a kadar discard et, ilk 50 zaten indilirilmis olabilir o halde indirecegim aralik 50-75
+/// Algorithm: [oynadigim level,((bulundugum dilim + 2) * 25)] rangeinde zaten indirilmiş olanlar haric
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// 1-h-8
+//

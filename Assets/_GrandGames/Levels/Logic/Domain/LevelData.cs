@@ -5,7 +5,7 @@ namespace _GrandGames.Levels.Logic.Domain
     {
         public int level;
         public string levelId;
-        public string difficulty;
+        public Difficulty difficulty;
         public int gridSize;
         public string[][] board;
     }
