@@ -4,7 +4,7 @@ using _GrandGames.Util;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace _GrandGames.Levels.Logic.Test
+namespace _GrandGames.Levels.Test
 {
     public class TestNetworkSimulation : MonoBehaviour
     {

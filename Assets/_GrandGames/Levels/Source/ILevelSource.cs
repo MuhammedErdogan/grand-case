@@ -1,8 +1,8 @@
 using System.Threading;
-using _GrandGames.Levels.Logic.Domain;
+using _GrandGames.Levels.Domain;
 using Cysharp.Threading.Tasks;
 
-namespace _GrandGames.Levels.Logic.Source
+namespace _GrandGames.Levels.Source
 {
     public interface ILevelSource
     {

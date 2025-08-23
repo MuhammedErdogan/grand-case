@@ -1,11 +1,11 @@
 using System;
 using System.Threading;
-using Cysharp.Threading.Tasks;
-using _GrandGames.Levels.Logic.Domain;
+using _GrandGames.Levels.Domain;
 using _GrandGames.Util;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace _GrandGames.Levels.Logic.Source
+namespace _GrandGames.Levels.Source
 {
     [Serializable]
     public sealed class RemoteSource : ILevelSource
@@ -39,6 +39,25 @@ namespace _GrandGames.Levels.Logic.Source
             catch
             {
                 return null; // streaming'de yoksa/hata varsa diğer kaynağa düş
+            }
+        }
+
+        public async UniTask SaveToCacheAsync(int level, CancellationToken ct)
+        {
+            try
+            {
+                var streamingRel = $"{_streamingFolder}/level_{level}_updated"; // .json opsiyonel
+                var persistentRel = $"{_persistentFolder}/level_{level}.json";
+
+                await LocalFileHelper.CopyStreamingToPersistentAtomic(
+                    streamingRelative: streamingRel,
+                    persistentRelative: persistentRel,
+                    ct: ct);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
     }

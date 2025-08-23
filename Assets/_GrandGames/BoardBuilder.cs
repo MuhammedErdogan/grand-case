@@ -1,5 +1,5 @@
 using System;
-using _GrandGames.Levels.Logic.Domain;
+using _GrandGames.Levels.Domain;
 using Cysharp.Threading.Tasks;
 
 namespace _GrandGames

@@ -1,11 +1,11 @@
 using System;
 using System.Threading;
-using _GrandGames.Levels.Logic.Domain;
+using _GrandGames.Levels.Domain;
 using _GrandGames.Util;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace _GrandGames.Levels.Logic.Source
+namespace _GrandGames.Levels.Source
 {
     [Serializable]
     public sealed class ResourcesSource : ILevelSource
