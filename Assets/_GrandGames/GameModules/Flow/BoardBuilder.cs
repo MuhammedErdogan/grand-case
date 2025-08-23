@@ -1,8 +1,8 @@
 using System;
-using _GrandGames.Levels.Domain;
+using _GrandGames.GameModules.Level.Domain;
 using Cysharp.Threading.Tasks;
 
-namespace _GrandGames
+namespace _GrandGames.Modules.Flow
 {
     [Serializable]
     public class BoardBuilder

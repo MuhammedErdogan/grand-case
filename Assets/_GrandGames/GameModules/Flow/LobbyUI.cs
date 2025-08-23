@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace _GrandGames
+namespace _GrandGames.Modules.Flow
 {
     public class LobbyUI : MonoBehaviour
     {
@@ -42,6 +42,16 @@ namespace _GrandGames
                 2 => Color.red,
                 _ => Color.white
             };
+        }
+
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
+
+        public void Show()
+        {
+            gameObject.SetActive(true);
         }
     }
 }

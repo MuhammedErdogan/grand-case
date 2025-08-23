@@ -1,7 +1,7 @@
 // Assets/_GrandGames/Levels/Logic/Domain/LevelChunkManifest.cs
 using System;
 
-namespace _GrandGames.Levels.Domain
+namespace _GrandGames.GameModules.Level.Domain
 {
     [Serializable]
     public sealed class LevelChunkManifest
@@ -39,6 +39,19 @@ namespace _GrandGames.Levels.Domain
             return true;
         }
 
-        public int IndexOf(int level) => level - start; // aralıkta olduğu varsayımıyla
+        public bool IsCompleteFrom(int startLevel)
+        {
+            var a = ok;
+
+            for (int i = startLevel; i < 50; i++)
+            {
+                if (!a[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

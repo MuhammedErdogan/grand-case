@@ -1,12 +1,12 @@
 using System;
 using System.Threading;
+using _GrandGames.GameModules.Level.Domain;
+using _GrandGames.GameModules.Level.Source;
+using _GrandGames.Util;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using _GrandGames.Levels.Domain;
-using _GrandGames.Levels.Source;
-using _GrandGames.Util;
 
-namespace _GrandGames.Levels
+namespace _GrandGames.GameModules.Level
 {
     [Serializable]
     public class LevelService

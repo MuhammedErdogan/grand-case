@@ -1,9 +1,9 @@
-using System;
-using _GrandGames.Levels;
-using _GrandGames.Levels.Source;
+using _GrandGames.GameModules.Level;
+using _GrandGames.GameModules.Level.Source;
+using _GrandGames.GameModules.Overlay;
 using UnityEngine;
 
-namespace _GrandGames
+namespace _GrandGames.Modules.Flow
 {
     public class GameFlowController : MonoBehaviour
     {
@@ -13,6 +13,10 @@ namespace _GrandGames
         [SerializeField] private BoardBuilder _boardBuilder;
 
         [Header("References")] [SerializeField] private LobbyUI _lobbyUI;
+        [SerializeField] private GameUI _gameUI;
+        [SerializeField] private OverlayUI _overlayUI;
+
+        [SerializeField] private int TestLevel = 1;
 
         private void Awake()
         {
@@ -39,6 +43,13 @@ namespace _GrandGames
             var currentLevel = await _levelService.GetLevelData(1, default);
 
             var board = await _boardBuilder.BuildAsync(currentLevel);
+
+            _overlayUI.ShowLoadingPanel();
+
+            _lobbyUI.Hide();
+            _gameUI.Show(board);
+
+            _overlayUI.HideLoadingPanel();
 
             Debug.Log($"Board Size: {board.GetLength(0)}x{board.GetLength(1)}");
         }
@@ -71,7 +82,7 @@ namespace _GrandGames
         private void TestLevelFinished()
         {
             var remoteSource = new RemoteSource();
-            _levelScheduler.OnLevelFinished(10, remoteSource);
+            _levelScheduler.OnLevelFinished(TestLevel, remoteSource);
         }
     }
 }

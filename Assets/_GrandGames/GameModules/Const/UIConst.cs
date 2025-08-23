@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace _GrandGames.Const
+namespace _GrandGames.GameModules.Const
 {
     public static class UIConst
     {

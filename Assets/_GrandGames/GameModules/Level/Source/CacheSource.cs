@@ -1,11 +1,11 @@
 using System;
 using System.Threading;
-using _GrandGames.Levels.Domain;
+using _GrandGames.GameModules.Level.Domain;
 using _GrandGames.Util;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace _GrandGames.Levels.Source
+namespace _GrandGames.GameModules.Level.Source
 {
     [Serializable]
     public sealed class CacheSource : ILevelSource
