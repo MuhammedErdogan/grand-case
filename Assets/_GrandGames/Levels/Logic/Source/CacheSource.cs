@@ -1,11 +1,13 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using _GrandGames.Levels.Logic.Domain;
-using _GrandGames.Levels.Logic.Util;
+using _GrandGames.Util;
 
 namespace _GrandGames.Levels.Logic.Source
 {
+    [Serializable]
     public sealed class CacheSource : ILevelSource
     {
         private readonly string _persistentFolder; //levels

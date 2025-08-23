@@ -1,12 +1,14 @@
+using System;
 using System.Threading;
 using _GrandGames.Levels.Logic.Domain;
-using _GrandGames.Levels.Logic.Util;
+using _GrandGames.Util;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace _GrandGames.Levels.Logic.Source
 {
-    public class ResourcesSource : ILevelSource
+    [Serializable]
+    public sealed class ResourcesSource : ILevelSource
     {
         // Resources path: "resources_levels_1_500/level_1"
 

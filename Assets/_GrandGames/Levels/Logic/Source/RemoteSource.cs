@@ -1,0 +1,45 @@
+using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using _GrandGames.Levels.Logic.Domain;
+using _GrandGames.Util;
+using UnityEngine;
+
+namespace _GrandGames.Levels.Logic.Source
+{
+    [Serializable]
+    public sealed class RemoteSource : ILevelSource
+    {
+        private readonly string _streamingFolder; // "levels_1_500"
+        private readonly string _persistentFolder; // "levels"
+
+        public RemoteSource(string streamingFolder = "levels_1_500", string persistentFolder = "levels")
+        {
+            _streamingFolder = streamingFolder.Trim().TrimStart('/');
+            _persistentFolder = persistentFolder.Trim().TrimStart('/');
+        }
+
+        public async UniTask<LevelData> TryGetAsync(int level, CancellationToken ct)
+        {
+            try
+            {
+                var streamingRel = $"{_streamingFolder}/level_{level}_updated"; // .json opsiyonel
+                var persistentRel = $"{_persistentFolder}/level_{level}.json";
+
+                await LocalFileHelper.CopyStreamingToPersistentAtomic(
+                    streamingRelative: streamingRel,
+                    persistentRelative: persistentRel,
+                    ct: ct);
+
+                var json = await LocalFileHelper.ReadPersistentText(persistentRel, ct);
+                return string.IsNullOrWhiteSpace(json) ?
+                    null :
+                    JsonUtility.FromJson<LevelData>(json);
+            }
+            catch
+            {
+                return null; // streaming'de yoksa/hata varsa diğer kaynağa düş
+            }
+        }
+    }
+}

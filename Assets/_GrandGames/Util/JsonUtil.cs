@@ -1,7 +1,7 @@
 using System.Text;
 using UnityEngine;
 
-namespace _GrandGames.Levels.Logic.Util
+namespace _GrandGames.Util
 {
     public static class JsonUtil
     {
