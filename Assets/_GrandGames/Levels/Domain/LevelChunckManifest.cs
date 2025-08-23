@@ -15,7 +15,7 @@ namespace _GrandGames.Levels.Domain
             return new LevelChunkManifest
             {
                 start = chunkStart,
-                end = chunkStart + 50,
+                end = chunkStart + 49,
                 ok = new bool[50]
             };
         }

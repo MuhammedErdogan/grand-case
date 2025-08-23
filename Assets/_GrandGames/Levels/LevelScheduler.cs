@@ -27,12 +27,12 @@ namespace _GrandGames.Levels
             var chunkStart = (currentChunk) * 25;
             var endInclusive = (currentChunk + 2) * 25;
 
-            var manifest = await _manifestStore.LoadAsync(currentStartExclusive, endInclusive, ct) ?? LevelChunkManifest.Create(chunkStart);
+            //var manifest = await _manifestStore.LoadAsync(currentStartExclusive, endInclusive, ct) ?? LevelChunkManifest.Create(chunkStart);
 
-            if (manifest.IsComplete())
-            {
-                return;
-            }
+            // if (manifest.IsComplete())
+            // {
+            //     return;
+            // }
 
             for (var lvl = currentStartExclusive; lvl <= endInclusive; lvl++)
             {
@@ -42,28 +42,28 @@ namespace _GrandGames.Levels
                     continue;
                 }
 
-                if (manifest.ok[idx])
-                {
-                    continue;
-                }
+                // if (manifest.ok[idx])
+                // {
+                //     continue;
+                // }
 
                 await _concurrency.WaitAsync(ct);
-                _ = DownloadAndMark(lvl, rs, manifest, ct);
+                _ = DownloadAndMark(lvl, rs, ct);
             }
         }
 
-        private async UniTaskVoid DownloadAndMark(int level, RemoteSource rs, LevelChunkManifest manifest, CancellationToken ct)
+        private async UniTaskVoid DownloadAndMark(int level, RemoteSource rs, CancellationToken ct)
         {
             try
             {
                 await rs.SaveToCacheAsync(level, ct);
 
-                var idx = manifest.IndexOf(level);
-                if (idx is >= 0 and < 50)
-                {
-                    manifest.ok[idx] = true;
-                    await _manifestStore.SaveAsync(manifest, ct); // atomic update
-                }
+                // var idx = manifest.IndexOf(level);
+                // if (idx is >= 0 and < 50)
+                // {
+                //     manifest.ok[idx] = true;
+                //     await _manifestStore.SaveAsync(manifest, ct); // atomic update
+                // }
             }
             catch (Exception e)
             {
