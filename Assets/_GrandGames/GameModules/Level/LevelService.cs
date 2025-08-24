@@ -25,6 +25,11 @@ namespace _GrandGames.GameModules.Level
 
         public async UniTask<LevelData> GetCurrentLevelData(CancellationToken ct)
         {
+            if (_currentLevel?.level is { } curLvl && curLvl == CurrentLevel)
+            {
+                return _currentLevel;
+            }
+
             var level = CurrentLevel;
             var levelData = await _cacheSource.TryGetAsync(level, ct);
             if (levelData != null)

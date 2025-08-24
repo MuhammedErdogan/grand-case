@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,6 +9,7 @@ namespace _GrandGames.GameModules.Flow
     {
         [SerializeField] private Button _playButton;
         [SerializeField] private Image _difficultyImage;
+        [SerializeField] private TextMeshProUGUI _levelText;
 
         public Action OnPlayButtonClickedEvent;
 
@@ -52,6 +54,11 @@ namespace _GrandGames.GameModules.Flow
         public void Show()
         {
             gameObject.SetActive(true);
+        }
+
+        public void SetLevel(int levelServiceCurrentLevel)
+        {
+            _levelText.SetText($"Level {levelServiceCurrentLevel}");
         }
     }
 }

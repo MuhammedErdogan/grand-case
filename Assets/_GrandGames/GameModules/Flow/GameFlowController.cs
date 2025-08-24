@@ -55,7 +55,7 @@ namespace _GrandGames.GameModules.Flow
         {
             _overlayUI.ShowLoadingPanel();
 
-            await PrepareLevelAndSetDifficulty();
+            await PrepareLevelAndLobbyUI();
 
             _lobbyUI.Show();
             _gameUI.Hide();
@@ -107,7 +107,7 @@ namespace _GrandGames.GameModules.Flow
 
             _overlayUI.ShowLoadingPanel();
 
-            await PrepareLevelAndSetDifficulty();
+            await PrepareLevelAndLobbyUI();
 
             _lobbyUI.Show();
             _gameUI.Hide();
@@ -115,10 +115,11 @@ namespace _GrandGames.GameModules.Flow
             _overlayUI.HideLoadingPanel();
         }
 
-        private async UniTask PrepareLevelAndSetDifficulty()
+        private async UniTask PrepareLevelAndLobbyUI()
         {
             var difficulty = await _levelService.PrepareCurrentLevel(this.GetCancellationTokenOnDestroy());
             _lobbyUI.SetDifficulty((int)difficulty);
+            _lobbyUI.SetLevel(_levelService.CurrentLevel);
         }
 
         [ContextMenu("Test Get From Remote")]

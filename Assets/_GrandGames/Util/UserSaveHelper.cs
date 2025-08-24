@@ -4,7 +4,7 @@ namespace _GrandGames.Util
 {
     public static class UserSaveHelper
     {
-        public static void SaveInt(string key, int value)
+        public static void SaveInt(string key, int value) //can send to cloud 
         {
             PlayerPrefs.SetInt(key, value);
             PlayerPrefs.Save();
