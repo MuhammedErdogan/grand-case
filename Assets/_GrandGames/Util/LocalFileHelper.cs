@@ -9,7 +9,11 @@ namespace _GrandGames.Util
 {
     public static class LocalFileHelper
     {
-        private static string LevelsRoot => Path.Combine(Application.dataPath, "Levels");
+        private static string ProjectRoot =>
+            Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+
+        private static string LevelsRoot =>
+            Path.Combine(ProjectRoot, "Levels");
 
         private static string Normalize(string rel)
         {

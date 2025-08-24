@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using _GrandGames.GameModules.Level.Domain;
+using _GrandGames.GameModules.Level.Util;
 using _GrandGames.Util;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -34,7 +35,7 @@ namespace _GrandGames.GameModules.Level.Source
                 var json = await LocalFileHelper.ReadPersistentText(persistentRel, ct);
                 return string.IsNullOrWhiteSpace(json) ?
                     null :
-                    JsonUtility.FromJson<LevelData>(json);
+                    LevelJson.Parse(json);
             }
             catch
             {

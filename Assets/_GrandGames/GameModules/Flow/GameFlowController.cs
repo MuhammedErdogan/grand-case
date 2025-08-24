@@ -51,7 +51,7 @@ namespace _GrandGames.GameModules.Flow
             _gameUI.OnLost -= OnGameLost;
         }
 
-        public async void InitialGameProcess()
+        private async void InitialGameProcess()
         {
             _overlayUI.ShowLoadingPanel();
 
