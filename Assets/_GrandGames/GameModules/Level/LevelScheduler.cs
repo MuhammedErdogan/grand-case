@@ -19,7 +19,7 @@ namespace _GrandGames.GameModules.Level
         /// - icinde bulunulan pencereyi tamamla (manifest’e gore eksikleri indir)
         public async UniTask CheckLevelSchedule(int playedLevel, RemoteSource rs)
         {
-            if (Application.internetReachability == NetworkReachability.NotReachable)
+            if (Application.internetReachability == NetworkReachability.NotReachable) //for simulate remote source offline
             {
                 Debug.Log("[LevelScheduler] Offline; prefetch skipped.");
                 return;
