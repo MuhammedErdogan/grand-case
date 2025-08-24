@@ -27,6 +27,7 @@ namespace _GrandGames.GameModules.Level
         {
             if (_currentLevel?.level is { } curLvl && curLvl == CurrentLevel)
             {
+                Debug.Log($"[LevelService] 0 Returning cached current level data for level {CurrentLevel}");
                 return _currentLevel;
             }
 
@@ -34,33 +35,26 @@ namespace _GrandGames.GameModules.Level
             var levelData = await _cacheSource.TryGetAsync(level, ct);
             if (levelData != null)
             {
+                Debug.Log($"[LevelService] 1 Returning cached level data for level {level} from CacheSource");
                 return levelData;
             }
+
+            Debug.Log($"[LevelService] 2 Returning cached level data for level {CurrentLevel}");
 
             levelData = await _remoteSource.TryGetAsync(level, ct);
             if (levelData != null)
             {
+                Debug.Log($"[LevelService] 3 Returning level data for level {level} from RemoteSource");
                 return levelData;
             }
 
+            Debug.Log($"[LevelService] 4 Returning level data for level {level} from ResourcesSource");
+
             levelData = await _resourcesSource.TryGetAsync(level, ct);
 
+            Debug.Log($"[LevelService] 5 Returning level data for level {level} from ResourcesSource");
+
             return levelData;
-        }
-
-        public void GetFromRemote()
-        {
-            _remoteSource.TryGetAsync(1, default).Forget();
-        }
-
-        public void GetFromCache()
-        {
-            _cacheSource.TryGetAsync(1, default).Forget();
-        }
-
-        public void GetFromResources()
-        {
-            _resourcesSource.TryGetAsync(1, default).Forget();
         }
 
         public void IncrementLevel()
@@ -79,6 +73,22 @@ namespace _GrandGames.GameModules.Level
             }
 
             return Difficulty.Medium;
+        }
+
+        //TODO: remove these test methods
+        public void GetFromRemote()
+        {
+            _remoteSource.TryGetAsync(1, default).Forget();
+        }
+
+        public void GetFromCache()
+        {
+            _cacheSource.TryGetAsync(1, default).Forget();
+        }
+
+        public void GetFromResources()
+        {
+            _resourcesSource.TryGetAsync(1, default).Forget();
         }
     }
 }

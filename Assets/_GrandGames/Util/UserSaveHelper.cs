@@ -7,7 +7,6 @@ namespace _GrandGames.Util
         public static void SaveInt(string key, int value) //can send to cloud 
         {
             PlayerPrefs.SetInt(key, value);
-            PlayerPrefs.Save();
         }
 
         public static int LoadInt(string key, int defaultValue = 0)

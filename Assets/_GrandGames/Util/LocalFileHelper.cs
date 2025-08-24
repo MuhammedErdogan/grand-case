@@ -4,6 +4,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Linq;
 
 namespace _GrandGames.Util
 {
@@ -23,6 +24,7 @@ namespace _GrandGames.Util
                 throw new Exception($"Unsafe relative path: {rel}");
             }
 
+            Debug.Log($"Normalize: {rel}");
             return rel;
         }
 
@@ -31,24 +33,38 @@ namespace _GrandGames.Util
             var path = absolutePathLike.Replace("\\", "/");
             if (path.StartsWith("jar:") || path.StartsWith("file:"))
             {
+                Debug.Log($"ToUri: {path}");
                 return path;
             }
 
+            Debug.Log($"ToUri: {path} -> {new Uri(path).AbsoluteUri}");
+
             return new Uri(path).AbsoluteUri;
+        }
+
+        private static string EncodePathPreserveSlashes(string rel)
+        {
+            return string.Join("/",
+                rel.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(Uri.EscapeDataString));
         }
 
         private static string StreamingAssetUrl(string relativePath)
         {
             var rel = Normalize(relativePath);
+            var encRel = EncodePathPreserveSlashes(rel); // <= kritik
 
             // Editor Assets/Levels ten okur, Build StreamingAssets ten okur.
 #if UNITY_EDITOR
             var basePath = LevelsRoot.Replace("\\", "/");
-#else
-            var basePath = Application.streamingAssetsPath.Replace("\\", "/");
-#endif
+            return ToUri($"{basePath}/{encRel}");
 
-            return ToUri($"{basePath}/{rel}");
+#else
+            var sa = Application.streamingAssetsPath.Replace("\\", "/");
+            // jar:file:///...!/assets/levels_1_500/level_1_updated   (uzantı şart değil)
+            Debug.Log($"StreamingAssetsPath: {sa}/{encRel}");
+            return $"{sa}/{encRel}";
+#endif
         }
 
         private static string PersistentAbsolute(string path)
@@ -179,9 +195,7 @@ namespace _GrandGames.Util
             IProgress<float> progress = null,
             CancellationToken ct = default)
         {
-            var rel = Normalize(streamingRelative);
-
-            var url = StreamingAssetUrl(rel);
+            var url = StreamingAssetUrl(streamingRelative);
             var dst = PersistentAbsolute(persistentRelative);
             Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
 

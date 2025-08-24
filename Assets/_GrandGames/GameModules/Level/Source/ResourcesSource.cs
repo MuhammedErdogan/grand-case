@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using _GrandGames.GameModules.Level.Domain;
+using _GrandGames.GameModules.Level.Util;
 using _GrandGames.Util;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -22,13 +23,13 @@ namespace _GrandGames.GameModules.Level.Source
         public async UniTask<LevelData> TryGetAsync(int level, CancellationToken ct)
         {
             var resPath = $"{_resourceFolder}/level_{level}";
-            var text = await LocalFileHelper.GetResourceText(resPath, unloadAfterRead: true, ct: ct);
-            if (string.IsNullOrEmpty(text))
+            var json = await LocalFileHelper.GetResourceText(resPath, unloadAfterRead: true, ct: ct);
+            if (string.IsNullOrEmpty(json))
             {
                 return null;
             }
 
-            var levelData = JsonUtility.FromJson<LevelData>(text);
+            var levelData = LevelJson.Parse(json);
 
             return levelData;
         }

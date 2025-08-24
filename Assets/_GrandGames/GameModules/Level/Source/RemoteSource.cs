@@ -24,7 +24,7 @@ namespace _GrandGames.GameModules.Level.Source
         {
             try
             {
-                var streamingRel = $"{_streamingFolder}/level_{level}_updated"; // .json opsiyonel
+                var streamingRel = $"{_streamingFolder}/level_{level}_updated";
                 var persistentRel = $"{_persistentFolder}/level_{level}.json";
 
                 await LocalFileHelper.CopyStreamingToPersistentAtomic(
@@ -37,9 +37,10 @@ namespace _GrandGames.GameModules.Level.Source
                     null :
                     LevelJson.Parse(json);
             }
-            catch
+            catch (Exception e)
             {
-                return null; // streaming'de yoksa/hata varsa diğer kaynağa düş
+                Debug.LogWarning($"[RemoteSource] Level {level} not found in streaming or error: {e.Message}");
+                return null;
             }
         }
 
@@ -47,7 +48,7 @@ namespace _GrandGames.GameModules.Level.Source
         {
             try
             {
-                var streamingRel = $"{_streamingFolder}/level_{level}_updated"; // .json opsiyonel
+                var streamingRel = $"{_streamingFolder}/level_{level}_updated";
                 var persistentRel = $"{_persistentFolder}/level_{level}.json";
 
                 await LocalFileHelper.CopyStreamingToPersistentAtomic(
@@ -57,8 +58,7 @@ namespace _GrandGames.GameModules.Level.Source
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                Debug.LogWarning($"[RemoteSource] SaveToCacheAsync level {level} error: {e.Message}");
             }
         }
     }

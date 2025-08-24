@@ -55,6 +55,8 @@ namespace _GrandGames.GameModules.Flow
         {
             _overlayUI.ShowLoadingPanel();
 
+            _levelScheduler.CheckLevelSchedule(_levelService.CurrentLevel - 1, _levelService.RemoteSource);
+
             await PrepareLevelAndLobbyUI();
 
             _lobbyUI.Show();
@@ -76,6 +78,9 @@ namespace _GrandGames.GameModules.Flow
             GC.Collect();
 
             var currentLevel = await _levelService.GetCurrentLevelData(this.GetCancellationTokenOnDestroy());
+
+            Debug.Log(currentLevel);
+
             var board = await _boardBuilder.BuildAsync(currentLevel);
 
             _lobbyUI.Hide();
@@ -100,7 +105,7 @@ namespace _GrandGames.GameModules.Flow
         {
             if (success)
             {
-                _levelScheduler.OnLevelFinished(_levelService.CurrentLevel, _levelService.RemoteSource);
+                _levelScheduler.CheckLevelSchedule(_levelService.CurrentLevel, _levelService.RemoteSource);
 
                 _levelService.IncrementLevel();
             }
@@ -144,7 +149,7 @@ namespace _GrandGames.GameModules.Flow
         private void TestLevelFinished()
         {
             var remoteSource = new RemoteSource();
-            _levelScheduler.OnLevelFinished(TestLevel, remoteSource);
+            _levelScheduler.CheckLevelSchedule(TestLevel, remoteSource);
         }
     }
 }

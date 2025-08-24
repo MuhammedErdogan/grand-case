@@ -17,7 +17,7 @@ namespace _GrandGames.GameModules.Level
 
         /// Oyuncu bir level bitirdiğinde çağır.
         /// - İçinde bulunulan pencereyi tamamla (manifest’e göre eksikleri indir)
-        public async void OnLevelFinished(int playedLevel, RemoteSource rs)
+        public async void CheckLevelSchedule(int playedLevel, RemoteSource rs)
         {
             var ct = _cts.Token;
 
@@ -90,6 +90,9 @@ namespace _GrandGames.GameModules.Level
                     manifest.ok[idxCurr] = true;
                 }
             }
+
+            //TODO: previous manifest silinebilir
+            //TODO: eski leveller silinebilir
         }
 
         private async UniTaskVoid DownloadAndMark(int lvl, int chunkStart, int chunkEnd, RemoteSource rs, LevelChunkManifest manifest, CancellationToken ct)

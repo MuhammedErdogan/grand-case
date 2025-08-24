@@ -32,7 +32,7 @@ namespace GrandGames.Editor
             if (!Directory.Exists(srcOutsideAbs))
             {
                 Debug.LogWarning($"[LevelSync] Outside source not found: {srcOutsideAbs}\n" +
-                                 $"Create '{SRC_OUTSIDE_REL}' under project root and drop level_###_updated(.json) files.");
+                                 $"Create '{SRC_OUTSIDE_REL}' under project root and drop level_###_updated files.");
 
                 return; // StreamingAssets klasörünü boşuna yaratma
             }
@@ -58,8 +58,7 @@ namespace GrandGames.Editor
             foreach (var srcFile in files)
             {
                 var name = Path.GetFileName(srcFile);
-                var dstName = EnsureJsonExtension(name);
-                var dstPath = Path.Combine(dest, dstName);
+                var dstPath = Path.Combine(dest, name);
 
                 if (CopyIfDifferent(srcFile, dstPath))
                 {
@@ -95,7 +94,7 @@ namespace GrandGames.Editor
                     if (si.Length == di.Length && si.LastWriteTimeUtc <= di.LastWriteTimeUtc)
                     {
                         return false;
-                    } // değişmemiş
+                    }
                 }
 
                 File.Copy(src, dst, overwrite: true);
@@ -107,11 +106,6 @@ namespace GrandGames.Editor
                 return false;
             }
         }
-
-        private static string EnsureJsonExtension(string name) =>
-            name.EndsWith(".json", StringComparison.OrdinalIgnoreCase) ?
-                name :
-                name + ".json";
 
         private static string NormalizePath(string p) =>
             string.IsNullOrEmpty(p) ?
