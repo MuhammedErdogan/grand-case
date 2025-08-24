@@ -75,7 +75,10 @@ namespace _GrandGames.GameModules.Level
             return Difficulty.Medium;
         }
 
-        //TODO: remove these test methods
+#if UNITY_EDITOR
+
+        #region TestMethods
+
         public void GetFromRemote()
         {
             _remoteSource.TryGetAsync(1, default).Forget();
@@ -90,5 +93,9 @@ namespace _GrandGames.GameModules.Level
         {
             _resourcesSource.TryGetAsync(1, default).Forget();
         }
+
+        #endregion
+
+#endif
     }
 }

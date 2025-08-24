@@ -15,11 +15,15 @@ namespace _GrandGames.GameModules.Level
         private readonly CancellationTokenSource _cts = new();
         private readonly LevelManifestStore _manifestStore = new();
 
-        /// Oyuncu bir level bitirdiğinde çağır.
-        /// - İçinde bulunulan pencereyi tamamla (manifest’e göre eksikleri indir)
+        /// Oyuncu bir level bitirdiginde çagir.
+        /// - icinde bulunulan pencereyi tamamla (manifest’e gore eksikleri indir)
         public async UniTask CheckLevelSchedule(int playedLevel, RemoteSource rs)
         {
-            //TODO: check internet connection?
+            if (Application.internetReachability == NetworkReachability.NotReachable)
+            {
+                Debug.Log("[LevelScheduler] Offline; prefetch skipped.");
+                return;
+            }
 
             var ct = _cts.Token;
 
@@ -46,6 +50,10 @@ namespace _GrandGames.GameModules.Level
             var manifest = await _manifestStore.LoadAsync(chunkStart, chunkEnd, ct) ?? LevelChunkManifest.Create(chunkStart);
 
             CheckIsPreviouslyDownloaded(manifestPreviously, currentStartExclusive, manifest);
+
+            //TODO: previous manifest silinebilir
+            //TODO: eski leveller silinebilir
+            await CleanupPreviousAsync(manifestPreviously, manifest, rs, ct);
 
             if (manifest.IsComplete(currentStartExclusive - 1))
             {
@@ -92,9 +100,16 @@ namespace _GrandGames.GameModules.Level
                     manifest.ok[idxCurr] = true;
                 }
             }
+        }
 
-            //TODO: previous manifest silinebilir
-            //TODO: eski leveller silinebilir
+        private async UniTask CleanupPreviousAsync(LevelChunkManifest prev, LevelChunkManifest current, RemoteSource rs, CancellationToken ct)
+        {
+            if (prev is null)
+            {
+                return;
+            }
+
+            //TODO: logic implement
         }
 
         private async UniTaskVoid DownloadAndMark(int lvl, int chunkStart, int chunkEnd, RemoteSource rs, CancellationToken ct)
