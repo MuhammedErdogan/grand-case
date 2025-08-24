@@ -39,16 +39,15 @@ namespace _GrandGames.GameModules.Level
                 return levelData;
             }
 
-            Debug.Log($"[LevelService] 2 Returning cached level data for level {CurrentLevel}");
-
-            levelData = await _remoteSource.TryGetAsync(level, ct);
-            if (levelData != null)
+            if (Application.internetReachability is not NetworkReachability.NotReachable) //for simulate remote source offline
             {
-                Debug.Log($"[LevelService] 3 Returning level data for level {level} from RemoteSource");
-                return levelData;
+                levelData = await _remoteSource.TryGetAsync(level, ct);
+                if (levelData != null)
+                {
+                    Debug.Log($"[LevelService] 3 Returning level data for level {level} from RemoteSource");
+                    return levelData;
+                }
             }
-
-            Debug.Log($"[LevelService] 4 Returning level data for level {level} from ResourcesSource");
 
             levelData = await _resourcesSource.TryGetAsync(level, ct);
 

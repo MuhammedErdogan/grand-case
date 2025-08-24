@@ -86,7 +86,7 @@ namespace _GrandGames.GameModules.Flow
             _lobbyUI.Hide();
             _gameUI.Show(board, currentLevel.LevelId);
 
-            await UniTask.Delay(500); //for simulate lobby loading time
+            await UniTask.Delay(250); //for simulate lobby loading time
 
             _overlayUI.HideLoadingPanel();
 
@@ -121,7 +121,7 @@ namespace _GrandGames.GameModules.Flow
 
             await Resources.UnloadUnusedAssets();
 
-            await UniTask.Delay(500); //for simulate lobby loading time
+            await UniTask.Delay(250); //for simulate lobby loading time
 
             _overlayUI.HideLoadingPanel();
         }
