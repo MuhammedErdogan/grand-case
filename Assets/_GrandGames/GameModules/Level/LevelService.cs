@@ -25,7 +25,7 @@ namespace _GrandGames.GameModules.Level
 
         public async UniTask<LevelData> GetCurrentLevelData(CancellationToken ct)
         {
-            if (_currentLevel?.level is { } curLvl && curLvl == CurrentLevel)
+            if (_currentLevel?.Level is { } curLvl && curLvl == CurrentLevel)
             {
                 Debug.Log($"[LevelService] 0 Returning cached current level data for level {CurrentLevel}");
                 return _currentLevel;
@@ -67,9 +67,9 @@ namespace _GrandGames.GameModules.Level
         {
             _currentLevel = await GetCurrentLevelData(ct);
 
-            if (_currentLevel?.level is { } curLvl && curLvl == CurrentLevel)
+            if (_currentLevel?.Level is { } curLvl && curLvl == CurrentLevel)
             {
-                return _currentLevel.difficulty;
+                return _currentLevel.Difficulty;
             }
 
             return Difficulty.Medium;

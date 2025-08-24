@@ -9,14 +9,14 @@ namespace _GrandGames.GameModules.Flow
     {
         public async UniTask<char[,]> BuildAsync(LevelData levelData)
         {
-            var size = levelData.gridSize;
+            var size = levelData.GridSize;
             var board = new char[size, size];
 
             for (var r = 0; r < size; r++)
             {
                 for (var c = 0; c < size; c++)
                 {
-                    board[r, c] = levelData.board[r][c][0];
+                    board[r, c] = levelData.Board[r][c][0];
                 }
             }
 

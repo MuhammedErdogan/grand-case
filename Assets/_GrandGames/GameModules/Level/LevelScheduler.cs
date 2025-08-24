@@ -64,7 +64,7 @@ namespace _GrandGames.GameModules.Level
                 }
 
                 await _concurrency.WaitAsync(ct);
-                _ = DownloadAndMark(lvl, chunkStart, chunkEnd, rs, manifest, ct);
+                _ = DownloadAndMark(lvl, chunkStart, chunkEnd, rs, ct);
             }
         }
 
@@ -95,7 +95,7 @@ namespace _GrandGames.GameModules.Level
             //TODO: eski leveller silinebilir
         }
 
-        private async UniTaskVoid DownloadAndMark(int lvl, int chunkStart, int chunkEnd, RemoteSource rs, LevelChunkManifest manifest, CancellationToken ct)
+        private async UniTaskVoid DownloadAndMark(int lvl, int chunkStart, int chunkEnd, RemoteSource rs, CancellationToken ct)
         {
             try
             {
