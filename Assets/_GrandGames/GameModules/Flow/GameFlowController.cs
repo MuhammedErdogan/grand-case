@@ -55,7 +55,7 @@ namespace _GrandGames.GameModules.Flow
         {
             _overlayUI.ShowLoadingPanel();
 
-            _levelScheduler.CheckLevelSchedule(_levelService.CurrentLevel - 1, _levelService.RemoteSource);
+            await _levelScheduler.CheckLevelSchedule(_levelService.CurrentLevel - 1, _levelService.RemoteSource);
 
             await PrepareLevelAndLobbyUI();
 
@@ -86,6 +86,8 @@ namespace _GrandGames.GameModules.Flow
             _lobbyUI.Hide();
             _gameUI.Show(board);
 
+            await UniTask.Delay(500); //for simulate lobby loading time
+
             _overlayUI.HideLoadingPanel();
 
             Debug.Log($"Board Size: {board.GetLength(0)}x{board.GetLength(1)}");
@@ -105,7 +107,7 @@ namespace _GrandGames.GameModules.Flow
         {
             if (success)
             {
-                _levelScheduler.CheckLevelSchedule(_levelService.CurrentLevel, _levelService.RemoteSource);
+                _ = _levelScheduler.CheckLevelSchedule(_levelService.CurrentLevel, _levelService.RemoteSource);
 
                 _levelService.IncrementLevel();
             }
@@ -116,6 +118,10 @@ namespace _GrandGames.GameModules.Flow
 
             _lobbyUI.Show();
             _gameUI.Hide();
+
+            await Resources.UnloadUnusedAssets();
+
+            await UniTask.Delay(500); //for simulate lobby loading time
 
             _overlayUI.HideLoadingPanel();
         }
@@ -149,7 +155,7 @@ namespace _GrandGames.GameModules.Flow
         private void TestLevelFinished()
         {
             var remoteSource = new RemoteSource();
-            _levelScheduler.CheckLevelSchedule(TestLevel, remoteSource);
+            _ = _levelScheduler.CheckLevelSchedule(TestLevel, remoteSource);
         }
     }
 }

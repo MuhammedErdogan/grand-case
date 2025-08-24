@@ -17,8 +17,10 @@ namespace _GrandGames.GameModules.Level
 
         /// Oyuncu bir level bitirdiğinde çağır.
         /// - İçinde bulunulan pencereyi tamamla (manifest’e göre eksikleri indir)
-        public async void CheckLevelSchedule(int playedLevel, RemoteSource rs)
+        public async UniTask CheckLevelSchedule(int playedLevel, RemoteSource rs)
         {
+            //TODO: check internet connection?
+
             var ct = _cts.Token;
 
             //[oynadigim level,((bulundugum dilim + 2) * 25)] 

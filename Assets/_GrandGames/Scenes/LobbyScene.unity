@@ -270,7 +270,7 @@ MonoBehaviour:
   _lobbyUI: {fileID: 8877869}
   _gameUI: {fileID: 1168163555}
   _overlayUI: {fileID: 911402339}
-  TestLevel: 80
+  TestLevel: 1
 --- !u!4 &220711211
 Transform:
   m_ObjectHideFlags: 0
