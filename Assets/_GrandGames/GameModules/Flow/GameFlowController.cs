@@ -1,9 +1,11 @@
+using System;
 using _GrandGames.GameModules.Level;
 using _GrandGames.GameModules.Level.Source;
 using _GrandGames.GameModules.Overlay;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace _GrandGames.Modules.Flow
+namespace _GrandGames.GameModules.Flow
 {
     public class GameFlowController : MonoBehaviour
     {
@@ -28,23 +30,53 @@ namespace _GrandGames.Modules.Flow
             _lobbyUI ??= FindFirstObjectByType<LobbyUI>();
         }
 
+        private void Start()
+        {
+            InitialGameProcess();
+        }
+
         private void OnEnable()
         {
             _lobbyUI.OnPlayButtonClickedEvent += OnPlayButtonClicked;
+
+            _gameUI.OnWon += OnGameWon;
+            _gameUI.OnLost += OnGameLost;
         }
 
         private void OnDisable()
         {
             _lobbyUI.OnPlayButtonClickedEvent -= OnPlayButtonClicked;
+
+            _gameUI.OnWon -= OnGameWon;
+            _gameUI.OnLost -= OnGameLost;
         }
 
-        private async void OnPlayButtonClicked()
+        public async void InitialGameProcess()
         {
-            var currentLevel = await _levelService.GetLevelData(1, default);
-
-            var board = await _boardBuilder.BuildAsync(currentLevel);
-
             _overlayUI.ShowLoadingPanel();
+
+            await PrepareLevelAndSetDifficulty();
+
+            _lobbyUI.Show();
+            _gameUI.Hide();
+
+            _overlayUI.HideLoadingPanel();
+        }
+
+        private void OnPlayButtonClicked()
+        {
+            LoadLevelProcess();
+        }
+
+        private async void LoadLevelProcess()
+        {
+            _overlayUI.ShowLoadingPanel();
+
+            await Resources.UnloadUnusedAssets();
+            GC.Collect();
+
+            var currentLevel = await _levelService.GetCurrentLevelData(this.GetCancellationTokenOnDestroy());
+            var board = await _boardBuilder.BuildAsync(currentLevel);
 
             _lobbyUI.Hide();
             _gameUI.Show(board);
@@ -54,10 +86,39 @@ namespace _GrandGames.Modules.Flow
             Debug.Log($"Board Size: {board.GetLength(0)}x{board.GetLength(1)}");
         }
 
-        private void OnLobbyLoaded()
+        private void OnGameWon()
         {
-            //var difficulty = _levelService.GetDifficulty();
-            _lobbyUI.SetDifficulty(2);
+            LoadLobbyFromLevelFinished(true);
+        }
+
+        private void OnGameLost()
+        {
+            LoadLobbyFromLevelFinished(false);
+        }
+
+        private async void LoadLobbyFromLevelFinished(bool success)
+        {
+            if (success)
+            {
+                _levelScheduler.OnLevelFinished(_levelService.CurrentLevel, _levelService.RemoteSource);
+
+                _levelService.IncrementLevel();
+            }
+
+            _overlayUI.ShowLoadingPanel();
+
+            await PrepareLevelAndSetDifficulty();
+
+            _lobbyUI.Show();
+            _gameUI.Hide();
+
+            _overlayUI.HideLoadingPanel();
+        }
+
+        private async UniTask PrepareLevelAndSetDifficulty()
+        {
+            var difficulty = await _levelService.PrepareCurrentLevel(this.GetCancellationTokenOnDestroy());
+            _lobbyUI.SetDifficulty((int)difficulty);
         }
 
         [ContextMenu("Test Get From Remote")]

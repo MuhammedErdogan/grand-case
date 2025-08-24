@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace _GrandGames.Modules.Flow
+namespace _GrandGames.GameModules.Flow
 {
     public class LobbyUI : MonoBehaviour
     {

@@ -25,26 +25,32 @@ namespace _GrandGames.GameModules.Level
             var currentChunk = Mathf.FloorToInt(playedLevel / 25f);
             var currentStartExclusive = playedLevel + 1;
             var chunkStart = currentChunk * 25 + 1;
-            var endInclusive = (currentChunk + 2) * 25;
+            var chunkEnd = (currentChunk + 2) * 25;
 
             LevelChunkManifest manifestPreviously = null;
             if (currentChunk > 0)
             {
-                var previousChunkStart = (currentChunk - 1) * 25 + 1;
-                var previousChunkEnd = (currentChunk + 1) * 25;
-                manifestPreviously = await _manifestStore.LoadAsync(previousChunkStart, previousChunkEnd, ct);
+                var previousStartChunk = Mathf.Max(currentChunk - 2, 0);
+                var previousEndChunk = previousStartChunk == 0 ?
+                    currentChunk + 1 :
+                    currentChunk;
+
+                var previousStartIndex = previousStartChunk * 25 + 1;
+                var previousEndIndex = previousEndChunk * 25;
+
+                manifestPreviously = await _manifestStore.LoadAsync(previousStartIndex, previousEndIndex, ct);
             }
 
-            var manifest = await _manifestStore.LoadAsync(chunkStart, endInclusive, ct) ?? LevelChunkManifest.Create(chunkStart);
+            var manifest = await _manifestStore.LoadAsync(chunkStart, chunkEnd, ct) ?? LevelChunkManifest.Create(chunkStart);
 
             CheckIsPreviouslyDownloaded(manifestPreviously, currentStartExclusive, manifest);
 
-            if (manifest.IsComplete() || manifest.IsCompleteFrom(currentStartExclusive - 1))
+            if (manifest.IsComplete(currentStartExclusive - 1))
             {
                 return;
             }
 
-            for (var lvl = currentStartExclusive; lvl <= endInclusive; lvl++)
+            for (var lvl = currentStartExclusive; lvl <= chunkEnd; lvl++)
             {
                 var idx = lvl - currentStartExclusive;
                 if (idx is < 0 or >= 50)
@@ -58,7 +64,7 @@ namespace _GrandGames.GameModules.Level
                 }
 
                 await _concurrency.WaitAsync(ct);
-                _ = DownloadAndMark(lvl, rs, manifest, ct);
+                _ = DownloadAndMark(lvl, chunkStart, chunkEnd, rs, manifest, ct);
             }
         }
 
@@ -86,20 +92,13 @@ namespace _GrandGames.GameModules.Level
             }
         }
 
-        private async UniTaskVoid DownloadAndMark(int lvl, RemoteSource rs, LevelChunkManifest manifest, CancellationToken ct)
+        private async UniTaskVoid DownloadAndMark(int lvl, int chunkStart, int chunkEnd, RemoteSource rs, LevelChunkManifest manifest, CancellationToken ct)
         {
             try
             {
                 await rs.SaveToCacheAsync(lvl, ct);
 
-                var idx = lvl - manifest.start;
-                if (idx is < 0 or >= 50)
-                {
-                    return;
-                }
-
-                manifest.ok[idx] = true;
-                await _manifestStore.SaveAsync(manifest, ct); // atomic update
+                await _manifestStore.UpdateBitAsync(chunkStart, chunkEnd, lvl, ct); // merge-safe
             }
             catch (Exception e)
             {

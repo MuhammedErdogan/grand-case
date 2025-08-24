@@ -30,9 +30,7 @@ namespace _GrandGames.GameModules.Overlay
             _canvasGroup.alpha = 1;
             _canvasGroup.blocksRaycasts = true;
             _canvasGroup.interactable = true;
-
-            gameObject.SetActive(true);
-
+            
             _loadingInfoText.text = info;
 
             _rotateCoroutine = StartCoroutine(RotateLoadingImage());
@@ -43,9 +41,7 @@ namespace _GrandGames.GameModules.Overlay
             _canvasGroup.alpha = 0;
             _canvasGroup.blocksRaycasts = false;
             _canvasGroup.interactable = false;
-
-            gameObject.SetActive(false);
-
+            
             if (_rotateCoroutine == null)
             {
                 return;

@@ -11,23 +11,21 @@ namespace _GrandGames.GameModules.Level
     [Serializable]
     public class LevelService
     {
-        [SerializeField] private ResourcesSource _resourcesSource;
-        [SerializeField] private CacheSource _cacheSource;
-        [SerializeField] private RemoteSource _remoteSource;
+        [SerializeField] private ResourcesSource _resourcesSource = new();
+        [SerializeField] private CacheSource _cacheSource = new();
+        [SerializeField] private RemoteSource _remoteSource = new();
+        public RemoteSource RemoteSource => _remoteSource;
 
         private const string CURRENT_LEVEL_KEY = "CurrentLevel";
 
+        private LevelData _currentLevel;
+
         public int GetCurrentLevelIndex() => UserSaveHelper.LoadInt(CURRENT_LEVEL_KEY);
+        public int CurrentLevel => GetCurrentLevelIndex() + 1; //index 0-based, levels 1-based
 
-        private void Awake()
+        public async UniTask<LevelData> GetCurrentLevelData(CancellationToken ct)
         {
-            _resourcesSource = new ResourcesSource();
-            _cacheSource = new CacheSource();
-            _remoteSource = new RemoteSource();
-        }
-
-        public async UniTask<LevelData> GetLevelData(int level, CancellationToken ct)
-        {
+            var level = CurrentLevel;
             var levelData = await _cacheSource.TryGetAsync(level, ct);
             if (levelData != null)
             {
@@ -47,20 +45,35 @@ namespace _GrandGames.GameModules.Level
 
         public void GetFromRemote()
         {
-            Awake();
             _remoteSource.TryGetAsync(1, default).Forget();
         }
 
         public void GetFromCache()
         {
-            Awake();
             _cacheSource.TryGetAsync(1, default).Forget();
         }
 
         public void GetFromResources()
         {
-            Awake();
             _resourcesSource.TryGetAsync(1, default).Forget();
+        }
+
+        public void IncrementLevel()
+        {
+            var current = GetCurrentLevelIndex();
+            UserSaveHelper.SaveInt(CURRENT_LEVEL_KEY, current + 1);
+        }
+
+        public async UniTask<Difficulty> PrepareCurrentLevel(CancellationToken ct)
+        {
+            _currentLevel = await GetCurrentLevelData(ct);
+
+            if (_currentLevel?.level is { } curLvl && curLvl == CurrentLevel)
+            {
+                return _currentLevel.difficulty;
+            }
+
+            return Difficulty.Medium;
         }
     }
 }

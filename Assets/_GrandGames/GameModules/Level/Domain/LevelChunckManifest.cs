@@ -1,4 +1,3 @@
-// Assets/_GrandGames/Levels/Logic/Domain/LevelChunkManifest.cs
 using System;
 
 namespace _GrandGames.GameModules.Level.Domain
@@ -20,28 +19,16 @@ namespace _GrandGames.GameModules.Level.Domain
             };
         }
 
-        public bool IsComplete()
+        public bool IsComplete(int startLevel)
         {
             var a = ok;
+
+            startLevel -= start - 1; //to 0 based index
+
             if (a is not { Length: 50 })
             {
                 return false;
             }
-
-            for (var i = 0; i < 50; i++)
-            {
-                if (!a[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public bool IsCompleteFrom(int startLevel)
-        {
-            var a = ok;
 
             for (int i = startLevel; i < 50; i++)
             {

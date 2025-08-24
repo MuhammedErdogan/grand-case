@@ -1,15 +1,16 @@
-// Assets/_GrandGames/Levels/Logic/Util/LevelManifestStore.cs
+using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
-using _GrandGames.GameModules.Level.Domain;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using _GrandGames.GameModules.Level.Domain;
 
 namespace _GrandGames.GameModules.Level.Util
 {
     public sealed class LevelManifestStore
     {
-        private readonly string _folder; // "levels_manifest"
+        private readonly string _folder;
 
         public LevelManifestStore(string folder = "levels_manifest")
         {
@@ -18,6 +19,12 @@ namespace _GrandGames.GameModules.Level.Util
 
         private string RelPath(int start, int end) => $"{_folder}/chunk_{start}_{end}.json";
         private static string Abs(string rel) => Path.Combine(Application.persistentDataPath, rel);
+
+        // === her dosya icin ayrc SemaphoreSlim ===
+        private static readonly ConcurrentDictionary<string, SemaphoreSlim> FileLocks = new();
+
+        private static SemaphoreSlim GetLock(string absPath) =>
+            FileLocks.GetOrAdd(absPath, _ => new SemaphoreSlim(1, 1));
 
         public async UniTask<LevelChunkManifest> LoadAsync(int start, int end, CancellationToken ct)
         {
@@ -34,22 +41,61 @@ namespace _GrandGames.GameModules.Level.Util
                 JsonUtility.FromJson<LevelChunkManifest>(json);
         }
 
-        public async UniTask SaveAsync(LevelChunkManifest m, CancellationToken ct)
+        // Tek biti guvenle set eden, kilitli ve merge-safe guncelleme
+        public async UniTask UpdateBitAsync(int start, int end, int level, CancellationToken ct)
         {
-            var rel = RelPath(m.start, m.end);
+            var rel = RelPath(start, end);
             var abs = Abs(rel);
             Directory.CreateDirectory(Path.GetDirectoryName(abs)!);
 
-            var tmp = abs + ".tmp";
-            var json = JsonUtility.ToJson(m);
-            await File.WriteAllTextAsync(tmp, json, ct);
-
-            if (File.Exists(abs))
+            var gate = GetLock(abs);
+            await gate.WaitAsync(ct);
+            try
             {
-                File.Delete(abs);
-            }
+                LevelChunkManifest m;
+                if (File.Exists(abs))
+                {
+                    var jsonOld = await File.ReadAllTextAsync(abs, ct);
+                    m = string.IsNullOrWhiteSpace(jsonOld) ?
+                        LevelChunkManifest.Create(start) :
+                        JsonUtility.FromJson<LevelChunkManifest>(jsonOld) ?? LevelChunkManifest.Create(start);
+                }
+                else
+                {
+                    m = LevelChunkManifest.Create(start);
+                }
 
-            File.Move(tmp, abs);
+                var idx = level - m.start;
+                if (idx is >= 0 and < 50)
+                {
+                    m.ok[idx] = true;
+                }
+
+                var tmp = abs + "." + Guid.NewGuid().ToString("N") + ".tmp";
+                var json = JsonUtility.ToJson(m);
+                await File.WriteAllTextAsync(tmp, json, ct);
+
+                try
+                {
+                    if (File.Exists(abs))
+                    {
+                        File.Replace(tmp, abs, null);
+                    }
+                    else
+                    {
+                        File.Move(tmp, abs);
+                    }
+                }
+                catch
+                {
+                    File.Copy(tmp, abs, true);
+                    File.Delete(tmp);
+                }
+            }
+            finally
+            {
+                gate.Release();
+            }
         }
     }
 }

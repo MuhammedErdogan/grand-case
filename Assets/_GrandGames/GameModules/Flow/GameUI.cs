@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace _GrandGames.Modules.Flow
+namespace _GrandGames.GameModules.Flow
 {
     public class GameUI : MonoBehaviour
     {
@@ -11,8 +11,8 @@ namespace _GrandGames.Modules.Flow
         [SerializeField] private Button _loseButton;
         [SerializeField] private TextMeshProUGUI _boardText; //for testing
 
-        public Action OnWin;
-        public Action OnLose;
+        public Action OnWon;
+        public Action OnLost;
 
         private void OnEnable()
         {
@@ -28,12 +28,12 @@ namespace _GrandGames.Modules.Flow
 
         private void OnWinButtonClicked()
         {
-            OnWin?.Invoke();
+            OnWon?.Invoke();
         }
 
         private void OnLoseButtonClicked()
         {
-            OnLose?.Invoke();
+            OnLost?.Invoke();
         }
 
         public void Show(char[,] board)
@@ -41,7 +41,7 @@ namespace _GrandGames.Modules.Flow
             Debug.Log($"GameUI Show with board size: {board.GetLength(0)}x{board.GetLength(1)}");
             gameObject.SetActive(true);
 
-            _boardText.text = board.ToString();
+            _boardText.text = BoardFormatter.ToText(board);
         }
 
         public void Hide()
