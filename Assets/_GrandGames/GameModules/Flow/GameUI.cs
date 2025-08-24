@@ -10,6 +10,7 @@ namespace _GrandGames.GameModules.Flow
         [SerializeField] private Button _winButton;
         [SerializeField] private Button _loseButton;
         [SerializeField] private TextMeshProUGUI _boardText; //for testing
+        [SerializeField] private TextMeshProUGUI _levelIdText; //for testing
 
         public Action OnWon;
         public Action OnLost;
@@ -36,12 +37,13 @@ namespace _GrandGames.GameModules.Flow
             OnLost?.Invoke();
         }
 
-        public void Show(char[,] board)
+        public void Show(char[,] board, string levelId)
         {
             Debug.Log($"GameUI Show with board size: {board.GetLength(0)}x{board.GetLength(1)}");
             gameObject.SetActive(true);
 
             _boardText.text = BoardFormatter.ToText(board);
+            _levelIdText.text = levelId;
         }
 
         public void Hide()

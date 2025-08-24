@@ -84,7 +84,7 @@ namespace _GrandGames.GameModules.Flow
             var board = await _boardBuilder.BuildAsync(currentLevel);
 
             _lobbyUI.Hide();
-            _gameUI.Show(board);
+            _gameUI.Show(board, currentLevel.LevelId);
 
             await UniTask.Delay(500); //for simulate lobby loading time
 
