@@ -10,7 +10,7 @@ namespace _GrandGames.GameModules.Level.Domain
         public string[][] Board;
     }
 
-    public enum Difficulty
+    public enum Difficulty : byte
     {
         Easy,
         Medium,

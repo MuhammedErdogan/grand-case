@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading;
 using _GrandGames.GameModules.Level.Domain;
 using _GrandGames.GameModules.Level.Util;
@@ -36,6 +37,29 @@ namespace _GrandGames.GameModules.Level.Source
             catch
             {
                 return null;
+            }
+        }
+
+        public async UniTask DeleteFromCacheAsync(int lvl, CancellationToken ct = default)
+        {
+            var rel = $"{_persistentFolder}/level_{lvl}.json";
+            var abs = Path.Combine(Application.persistentDataPath, rel);
+
+            await UniTask.SwitchToThreadPool();
+            try
+            {
+                if (File.Exists(abs))
+                {
+                    File.Delete(abs);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[CacheSource] DeleteFromCacheAsync L{lvl} error: {e.Message}");
+            }
+            finally
+            {
+                await UniTask.SwitchToMainThread();
             }
         }
     }

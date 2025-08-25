@@ -41,6 +41,43 @@ namespace _GrandGames.GameModules.Level.Util
                 JsonUtility.FromJson<LevelChunkManifest>(json);
         }
 
+        public async UniTask DeleteAsync(int start, int end, CancellationToken ct)
+        {
+            var rel = RelPath(start, end);
+            var abs = Abs(rel);
+            var dir = Path.GetDirectoryName(abs)!;
+            Directory.CreateDirectory(dir);
+
+            var gate = GetLock(abs);
+            await gate.WaitAsync(ct);
+            try
+            {
+                if (!File.Exists(abs))
+                {
+                    return;
+                }
+
+                try
+                {
+                    foreach (var tmp in Directory.EnumerateFiles(dir, Path.GetFileName(abs) + ".*.tmp"))
+                    {
+                        File.Delete(tmp);
+                    }
+                }
+                catch
+                {
+                    Debug.LogWarning($"[LevelManifestStore] Cleanup temp files failed: {dir}");
+                }
+
+
+                File.Delete(abs);
+            }
+            finally
+            {
+                gate.Release();
+            }
+        }
+
         // Tek biti guvenle set eden, kilitli ve merge-safe guncelleme
         public async UniTask UpdateBitAsync(int start, int end, int level, CancellationToken ct)
         {

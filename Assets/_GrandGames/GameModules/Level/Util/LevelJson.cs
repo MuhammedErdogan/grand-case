@@ -8,6 +8,7 @@ namespace _GrandGames.GameModules.Level.Util
 {
     internal static class LevelJson
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static LevelData Parse(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
@@ -22,13 +23,19 @@ namespace _GrandGames.GameModules.Level.Util
                 return null;
             }
 
+            var boardFromMaskHex = BoardFromMaskHex(opt.Mh, opt.G);
+            if (boardFromMaskHex == null)
+            {
+                return null;
+            }
+
             var ld = new LevelData
             {
                 Level = opt.L,
                 LevelId = opt.Li,
                 Difficulty = opt.D,
                 GridSize = opt.G,
-                Board = BoardFromMaskHex(opt.Mh, opt.G)
+                Board = boardFromMaskHex
             };
 
             return ld;
@@ -46,14 +53,18 @@ namespace _GrandGames.GameModules.Level.Util
             var dStr = S(o, "d") ?? S(o, "difficulty");
             var d = ParseDifficulty(dStr);
 
+            var l = I(o, "l") ?? I(o, "level") ?? 0;
+            var li = S(o, "li") ?? S(o, "levelId") ?? $"level_{l}_updated";
+
             opt = new OptimizedLevelJson
             {
-                L = I(o, "l") ?? I(o, "level") ?? 0,
-                Li = S(o, "li") ?? S(o, "levelId"),
+                L = l,
+                Li = li,
                 D = d,
                 G = g.Value,
                 Mh = mh.Trim().ToLowerInvariant()
             };
+
             return true;
         }
 
@@ -61,7 +72,11 @@ namespace _GrandGames.GameModules.Level.Util
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Difficulty ParseDifficulty(string s)
         {
-            if (string.IsNullOrEmpty(s)) return Difficulty.Medium;
+            if (string.IsNullOrEmpty(s))
+            {
+                return Difficulty.Medium;
+            }
+
             return Enum.TryParse<Difficulty>(s, true, out var d) ?
                 d :
                 Difficulty.Medium;
@@ -91,9 +106,16 @@ namespace _GrandGames.GameModules.Level.Util
         }
 
         // Bit duzeni: row-major, (0,0)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static string[][] BoardFromMaskHex(string mh, int g)
         {
             var bytes = HexToBytes(mh);
+
+            if (bytes == null || g <= 0)
+            {
+                return null;
+            }
+
             var total = g * g;
             var needBytes = (total + 7) / 8;
 
@@ -130,6 +152,7 @@ namespace _GrandGames.GameModules.Level.Util
             return board;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static string[][] NewBoard(int g)
         {
             var b = new string[g][];
@@ -141,6 +164,7 @@ namespace _GrandGames.GameModules.Level.Util
             return b;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte[] HexToBytes(string hex)
         {
             hex = hex.Trim();

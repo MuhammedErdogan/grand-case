@@ -76,50 +76,6 @@ namespace _GrandGames.Util
             return abs;
         }
 
-        private static async UniTask<byte[]> GetBytes(string url, IProgress<float> progress = null, CancellationToken ct = default)
-        {
-            using var req = UnityWebRequest.Get(url);
-            await req.SendWebRequest().ToUniTask(progress: progress, cancellationToken: ct);
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                throw new Exception(req.error);
-            }
-
-            return req.downloadHandler.data;
-        }
-
-        private static async UniTask<string> GetText(string url, IProgress<float> progress = null, CancellationToken ct = default)
-        {
-            using var req = UnityWebRequest.Get(url);
-            await req.SendWebRequest().ToUniTask(progress: progress, cancellationToken: ct);
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                throw new Exception(req.error);
-            }
-
-            return req.downloadHandler.text;
-        }
-
-        public static async UniTask<byte[]> GetResourceBytes(string resourcePathWithoutExtension, bool unloadAfterRead = true, CancellationToken ct = default)
-        {
-            ct.ThrowIfCancellationRequested();
-            var req = Resources.LoadAsync<TextAsset>(resourcePathWithoutExtension);
-            await req.ToUniTask(cancellationToken: ct);
-
-            if (req.asset is not TextAsset ta)
-            {
-                throw new Exception($"TextAsset not found: {resourcePathWithoutExtension}");
-            }
-
-            var bytes = ta.bytes; // kucuk obejlerde ok
-            if (unloadAfterRead)
-            {
-                Resources.UnloadAsset(ta);
-            }
-
-            return bytes;
-        }
-
         public static async UniTask<string> GetResourceText(string resourcePathWithoutExtension, bool unloadAfterRead = true, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
@@ -140,52 +96,10 @@ namespace _GrandGames.Util
             return text;
         }
 
-        public static UniTask<string> GetStreamingText(string relativePath, IProgress<float> progress = null, CancellationToken ct = default)
-            => GetText(StreamingAssetUrl(relativePath), progress, ct);
-
-        public static UniTask<byte[]> GetStreamingBytes(string relativePath, IProgress<float> progress = null, CancellationToken ct = default)
-            => GetBytes(StreamingAssetUrl(relativePath), progress, ct);
-
         public static async UniTask<string> ReadPersistentText(string relativeOrAbsolutePath, CancellationToken ct = default)
         {
             var abs = PersistentAbsolute(relativeOrAbsolutePath);
             return await File.ReadAllTextAsync(abs, ct);
-        }
-
-        public static async UniTask<byte[]> ReadPersistentBytes(string relativeOrAbsolutePath, CancellationToken ct = default)
-        {
-            var abs = PersistentAbsolute(relativeOrAbsolutePath);
-            return await File.ReadAllBytesAsync(abs, ct);
-        }
-
-        public static async UniTask WritePersistentTextAtomic(string relativeOrAbsolutePath, string text, CancellationToken ct = default)
-        {
-            var abs = PersistentAbsolute(relativeOrAbsolutePath);
-            Directory.CreateDirectory(Path.GetDirectoryName(abs)!);
-            var tmp = abs + ".tmp";
-            await File.WriteAllTextAsync(tmp, text, ct);
-
-            if (File.Exists(abs))
-            {
-                File.Delete(abs);
-            }
-
-            File.Move(tmp, abs);
-        }
-
-        public static async UniTask WritePersistentBytesAtomic(string relativeOrAbsolutePath, byte[] bytes, CancellationToken ct = default)
-        {
-            var abs = PersistentAbsolute(relativeOrAbsolutePath);
-            Directory.CreateDirectory(Path.GetDirectoryName(abs)!);
-            var tmp = abs + ".tmp";
-            await File.WriteAllBytesAsync(tmp, bytes, ct);
-
-            if (File.Exists(abs))
-            {
-                File.Delete(abs);
-            }
-
-            File.Move(tmp, abs);
         }
 
         // STREAMING → PERSISTENT (atomic), büyük dosyalarda RAM'e almadan:

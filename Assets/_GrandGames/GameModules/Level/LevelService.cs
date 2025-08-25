@@ -13,6 +13,7 @@ namespace _GrandGames.GameModules.Level
     {
         [SerializeField] private ResourcesSource _resourcesSource = new();
         [SerializeField] private CacheSource _cacheSource = new();
+
         [SerializeField] private RemoteSource _remoteSource = new();
         public RemoteSource RemoteSource => _remoteSource;
 
@@ -59,7 +60,9 @@ namespace _GrandGames.GameModules.Level
         public void IncrementLevel()
         {
             var current = GetCurrentLevelIndex();
-            UserSaveHelper.SaveInt(CURRENT_LEVEL_KEY, current + 1);
+            var level = (current + 1) % 500;
+
+            UserSaveHelper.SaveInt(CURRENT_LEVEL_KEY, level);
         }
 
         public async UniTask<Difficulty> PrepareCurrentLevel(CancellationToken ct)
@@ -74,10 +77,22 @@ namespace _GrandGames.GameModules.Level
             return Difficulty.Medium;
         }
 
+        public async void ClearLastLevelCache(CancellationToken ct = default)
+        {
+            var lvl = CurrentLevel;
+            try
+            {
+                await _cacheSource.DeleteFromCacheAsync(lvl, ct);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[LevelService] Cache delete failed L{lvl}: {e.Message}");
+            }
+        }
+
 #if UNITY_EDITOR
 
-        #region TestMethods
-
+        // For testing purposes only
         public void GetFromRemote()
         {
             _remoteSource.TryGetAsync(1, default).Forget();
@@ -92,8 +107,6 @@ namespace _GrandGames.GameModules.Level
         {
             _resourcesSource.TryGetAsync(1, default).Forget();
         }
-
-        #endregion
 
 #endif
     }

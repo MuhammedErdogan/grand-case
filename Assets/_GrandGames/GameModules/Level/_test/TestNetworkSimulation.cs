@@ -1,5 +1,6 @@
+#if UNITY_EDITOR
+
 using System;
-using System.Text.RegularExpressions;
 using _GrandGames.Util;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace _GrandGames.GameModules.Level._test
         //local data path: Assets/_GrandGames/Resources/resources_levels_1_500
         //remote data path: Assets/_GrandGames/Levels/levels_1_500
 
-        private static readonly Regex LevelNameRegex = new("^[a-zA-Z0-9_]+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        //private static readonly Regex LevelNameRegex = new("^[a-zA-Z0-9_]+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         [ContextMenu("GetFromRemote")]
         private async void GetFromRemote()
@@ -72,3 +73,5 @@ namespace _GrandGames.GameModules.Level._test
 
 // 1-h-8
 //
+
+#endif

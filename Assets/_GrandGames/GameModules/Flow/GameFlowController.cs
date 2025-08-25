@@ -1,4 +1,5 @@
 using System;
+using _GrandGames.GameModules.Board;
 using _GrandGames.GameModules.Level;
 using _GrandGames.GameModules.Level.Source;
 using _GrandGames.GameModules.Overlay;
@@ -24,6 +25,8 @@ namespace _GrandGames.GameModules.Flow
         {
             _levelService = new LevelService();
             _levelScheduler = new LevelScheduler();
+
+            _levelScheduler.BindReferences(_levelService.RemoteSource);
 
             _boardBuilder = new BoardBuilder();
 
@@ -55,7 +58,7 @@ namespace _GrandGames.GameModules.Flow
         {
             _overlayUI.ShowLoadingPanel();
 
-            await _levelScheduler.CheckLevelSchedule(_levelService.CurrentLevel - 1, _levelService.RemoteSource);
+            await _levelScheduler.CheckLevelSchedule(_levelService.CurrentLevel - 1);
 
             await PrepareLevelAndLobbyUI();
 
@@ -107,8 +110,9 @@ namespace _GrandGames.GameModules.Flow
         {
             if (success)
             {
-                _ = _levelScheduler.CheckLevelSchedule(_levelService.CurrentLevel, _levelService.RemoteSource);
+                _ = _levelScheduler.CheckLevelSchedule(_levelService.CurrentLevel);
 
+                _levelService.ClearLastLevelCache();
                 _levelService.IncrementLevel();
             }
 
@@ -133,6 +137,8 @@ namespace _GrandGames.GameModules.Flow
             _lobbyUI.SetLevel(_levelService.CurrentLevel);
         }
 
+#if UNITY_EDITOR
+        // Testing context menu methods
         [ContextMenu("Test Get From Remote")]
         private void GetFromRemote()
         {
@@ -155,7 +161,9 @@ namespace _GrandGames.GameModules.Flow
         private void TestLevelFinished()
         {
             var remoteSource = new RemoteSource();
-            _ = _levelScheduler.CheckLevelSchedule(TestLevel, remoteSource);
+            _levelScheduler.BindReferences(remoteSource);
+            _ = _levelScheduler.CheckLevelSchedule(TestLevel);
         }
+#endif
     }
 }

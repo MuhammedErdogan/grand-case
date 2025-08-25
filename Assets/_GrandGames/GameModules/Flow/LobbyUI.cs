@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,10 +14,13 @@ namespace _GrandGames.GameModules.Flow
 
         public Action OnPlayButtonClickedEvent;
 
-        private void Start()
+        // can be moved to a config file or ScriptableObject for easier tweaking
+        private static readonly Dictionary<int, Color> Colors = new()
         {
-            SetDifficulty(1);
-        }
+            { 0, new Color(0.4f, 0.8f, 0.4f) }, // Easy - Green
+            { 1, new Color(1f, 0.65f, 0f) }, // Medium - Orange
+            { 2, new Color(1f, 0.2f, 0.2f) } // Hard - Red
+        };
 
         private void OnEnable()
         {
@@ -37,13 +41,7 @@ namespace _GrandGames.GameModules.Flow
         {
             Debug.Log($"Difficulty set to {difficulty}");
 
-            _difficultyImage.color = difficulty switch
-            {
-                0 => Color.green,
-                1 => Color.yellow,
-                2 => Color.red,
-                _ => Color.white
-            };
+            _difficultyImage.color = Colors[difficulty];
         }
 
         public void Hide()

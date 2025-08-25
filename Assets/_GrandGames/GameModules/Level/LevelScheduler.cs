@@ -15,9 +15,16 @@ namespace _GrandGames.GameModules.Level
         private readonly CancellationTokenSource _cts = new();
         private readonly LevelManifestStore _manifestStore = new();
 
+        private RemoteSource _remoteSource;
+
+        public void BindReferences(RemoteSource rs)
+        {
+            _remoteSource = rs;
+        }
+
         /// Oyuncu bir level bitirdiginde çagir.
         /// - icinde bulunulan pencereyi tamamla (manifest’e gore eksikleri indir)
-        public async UniTask CheckLevelSchedule(int playedLevel, RemoteSource rs)
+        public async UniTask CheckLevelSchedule(int playedLevel)
         {
             if (Application.internetReachability == NetworkReachability.NotReachable) //for simulate remote source offline
             {
@@ -51,9 +58,7 @@ namespace _GrandGames.GameModules.Level
 
             CheckIsPreviouslyDownloaded(manifestPreviously, currentStartExclusive, manifest);
 
-            //TODO: previous manifest silinebilir
-            //TODO: eski leveller silinebilir
-            await CleanupPreviousAsync(manifestPreviously, manifest, rs, ct);
+            await CleanupPreviousAsync(manifestPreviously, ct);
 
             if (manifest.IsComplete(currentStartExclusive - 1))
             {
@@ -74,7 +79,7 @@ namespace _GrandGames.GameModules.Level
                 }
 
                 await _concurrency.WaitAsync(ct);
-                _ = DownloadAndMark(lvl, chunkStart, chunkEnd, rs, ct);
+                _ = DownloadAndMark(lvl, chunkStart, chunkEnd, ct);
             }
         }
 
@@ -102,21 +107,28 @@ namespace _GrandGames.GameModules.Level
             }
         }
 
-        private async UniTask CleanupPreviousAsync(LevelChunkManifest prev, LevelChunkManifest current, RemoteSource rs, CancellationToken ct)
+        private async UniTask CleanupPreviousAsync(LevelChunkManifest prev, CancellationToken ct)
         {
             if (prev is null)
             {
                 return;
             }
 
-            //TODO: logic implement
+            try
+            {
+                await _manifestStore.DeleteAsync(prev.start, prev.end, ct); // LevelManifestStore'da bu metod olmalı
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[LevelScheduler] Manifest delete failed [{prev.start}-{prev.end}]: {e.Message}");
+            }
         }
 
-        private async UniTaskVoid DownloadAndMark(int lvl, int chunkStart, int chunkEnd, RemoteSource rs, CancellationToken ct)
+        private async UniTaskVoid DownloadAndMark(int lvl, int chunkStart, int chunkEnd, CancellationToken ct)
         {
             try
             {
-                await rs.SaveToCacheAsync(lvl, ct);
+                await _remoteSource.SaveToCacheAsync(lvl, ct);
 
                 await _manifestStore.UpdateBitAsync(chunkStart, chunkEnd, lvl, ct); // merge-safe
             }
