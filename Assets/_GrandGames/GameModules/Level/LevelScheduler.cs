@@ -17,13 +17,16 @@ namespace _GrandGames.GameModules.Level
 
         private RemoteSource _remoteSource;
 
+        private const int LEVEL_CHECK_INTERVAL = 25;
+        private const int LEVEL_CHUNK_SIZE = 50;
+
         public void BindReferences(RemoteSource rs)
         {
             _remoteSource = rs;
         }
 
-        /// Oyuncu bir level bitirdiginde çagir.
-        /// - icinde bulunulan pencereyi tamamla (manifest’e gore eksikleri indir)
+        /// call this method when a level is completed and on game start
+        /// complete current chunk
         public async UniTask CheckLevelSchedule(int playedLevel)
         {
             if (Application.internetReachability == NetworkReachability.NotReachable) //for simulate remote source offline
@@ -37,8 +40,8 @@ namespace _GrandGames.GameModules.Level
             //[oynadigim level,((bulundugum dilim + 2) * 25)] 
             var currentChunk = Mathf.FloorToInt(playedLevel / 25f);
             var currentStartExclusive = playedLevel + 1;
-            var chunkStart = currentChunk * 25 + 1;
-            var chunkEnd = (currentChunk + 2) * 25;
+            var chunkStart = currentChunk * LEVEL_CHECK_INTERVAL + 1;
+            var chunkEnd = (currentChunk + 2) * LEVEL_CHECK_INTERVAL;
 
             LevelChunkManifest manifestPreviously = null;
             if (currentChunk > 0)
@@ -48,8 +51,8 @@ namespace _GrandGames.GameModules.Level
                     currentChunk + 1 :
                     currentChunk;
 
-                var previousStartIndex = previousStartChunk * 25 + 1;
-                var previousEndIndex = previousEndChunk * 25;
+                var previousStartIndex = previousStartChunk * LEVEL_CHECK_INTERVAL + 1;
+                var previousEndIndex = previousEndChunk * LEVEL_CHECK_INTERVAL;
 
                 manifestPreviously = await _manifestStore.LoadAsync(previousStartIndex, previousEndIndex, ct);
             }
@@ -68,7 +71,7 @@ namespace _GrandGames.GameModules.Level
             for (var lvl = currentStartExclusive; lvl <= chunkEnd; lvl++)
             {
                 var idx = lvl - currentStartExclusive;
-                if (idx is < 0 or >= 50)
+                if (idx is < 0 or >= LEVEL_CHUNK_SIZE)
                 {
                     continue;
                 }
@@ -90,12 +93,12 @@ namespace _GrandGames.GameModules.Level
                 return;
             }
 
-            var checkForContinueStart = Math.Max(currentStartExclusive - 25, manifestPreviously.start);
+            var checkForContinueStart = Math.Max(currentStartExclusive - LEVEL_CHECK_INTERVAL, manifestPreviously.start);
             for (var lvl = checkForContinueStart; lvl <= manifestPreviously.end; lvl++)
             {
                 var idxPrev = lvl - manifestPreviously.start;
                 var idxCurr = lvl - manifest.start;
-                if (idxPrev is < 0 or >= 50 || idxCurr is < 0 or >= 50)
+                if (idxPrev is < 0 or >= LEVEL_CHUNK_SIZE || idxCurr is < 0 or >= LEVEL_CHUNK_SIZE)
                 {
                     continue;
                 }

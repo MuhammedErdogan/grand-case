@@ -5,9 +5,9 @@ namespace _GrandGames.GameModules.Level.Domain
     [Serializable]
     public sealed class LevelChunkManifest
     {
-        public int start; // haric
-        public int end; // dahil
-        public bool[] ok; // 50 uzunluk: ok[i] => (start + i) indirildi/kalici
+        public int start; // exclusive
+        public int end; // inclusive
+        public bool[] ok; // 50 lenght: ok[i] => (start + i) downloaded
 
         public static LevelChunkManifest Create(int chunkStart)
         {

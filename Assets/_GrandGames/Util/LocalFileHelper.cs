@@ -52,9 +52,8 @@ namespace _GrandGames.Util
         private static string StreamingAssetUrl(string relativePath)
         {
             var rel = Normalize(relativePath);
-            var encRel = EncodePathPreserveSlashes(rel); // <= kritik
+            var encRel = EncodePathPreserveSlashes(rel);
 
-            // Editor Assets/Levels ten okur, Build StreamingAssets ten okur.
 #if UNITY_EDITOR
             var basePath = LevelsRoot.Replace("\\", "/");
             return ToUri($"{basePath}/{encRel}");
@@ -102,7 +101,7 @@ namespace _GrandGames.Util
             return await File.ReadAllTextAsync(abs, ct);
         }
 
-        // STREAMING → PERSISTENT (atomic), büyük dosyalarda RAM'e almadan:
+        // STREAMING → PERSISTENT (atomic), without cache in RAM
         public static async UniTask CopyStreamingToPersistentAtomic(
             string streamingRelative,
             string persistentRelative,

@@ -20,7 +20,7 @@ namespace _GrandGames.GameModules.Level.Util
         private string RelPath(int start, int end) => $"{_folder}/chunk_{start}_{end}.json";
         private static string Abs(string rel) => Path.Combine(Application.persistentDataPath, rel);
 
-        // === her dosya icin ayrc SemaphoreSlim ===
+        // === SemaphoreSlim for each file ===
         private static readonly ConcurrentDictionary<string, SemaphoreSlim> FileLocks = new();
 
         private static SemaphoreSlim GetLock(string absPath) =>
@@ -77,8 +77,7 @@ namespace _GrandGames.GameModules.Level.Util
                 gate.Release();
             }
         }
-
-        // Tek biti guvenle set eden, kilitli ve merge-safe guncelleme
+        
         public async UniTask UpdateBitAsync(int start, int end, int level, CancellationToken ct)
         {
             var rel = RelPath(start, end);
